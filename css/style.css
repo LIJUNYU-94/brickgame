@@ -1,0 +1,33 @@
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  margin: 0;
+}
+
+canvas {
+  border: 1px solid #000;
+  scale: 2;
+  background: url(../img/haoren.png) no-repeat 50% 5%;
+  background-size: 50%;
+}
+
+button {
+  margin-top: 200px;
+  padding: 10px 20px;
+  font-size: 16px;
+}
+
+p {
+  position: absolute;
+  top: 10vh;
+  left: 10vh;
+  font-size: 48px;
+}
+
+span {
+  display: block;
+  font-size: 64px;
+}
