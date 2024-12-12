@@ -2,6 +2,13 @@ const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 const colors = ["#FF9500", "#2104f2", "#FF0033", "#047431", "#459211"];
 const pointShow = document.querySelector(".point");
+const levelShow = document.querySelector(".level");
+let gameRunning = true;
+let isGameStarted = false;
+let ballMoving = false;
+let level = 1; // 初期レベル
+let points = 0;
+let lastCollisionTime = 0; // 前回の衝突時刻を記録
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
@@ -13,13 +20,13 @@ let brickPadding = 3;
 let brickOffsetTop = 10;
 let brickOffsetLeft = 13;
 let bricks = [];
-let points = 0;
-let gameRunning = true;
+
 let ballRadius = 10;
 let x = canvas.width / 2;
 let y = canvas.height - 30;
 let dx = 4;
 let dy = -4;
+let speed = 4;
 let paddleHeight = 10;
 let paddleWidth = 75;
 let paddleX = (canvas.width - paddleWidth) / 2;
@@ -28,22 +35,33 @@ let rightPressed = false;
 let leftPressed = false;
 let upPressed = false;
 let downPressed = false;
+document.addEventListener("keydown", (e) => {
+  if (e.code === "Space") {
+    e.preventDefault(); // デフォルト動作（スクロールなど）を完全に無効化
+  }
+});
 function keyDownHandler(e) {
-  if (e.key === "Right" || e.key === "ArrowRight") {
+  if (e.key === "Right" || e.key === "ArrowRight" || e.code === "KeyD") {
     rightPressed = true;
-  } else if (e.key === "Left" || e.key === "ArrowLeft") {
+  } else if (e.key === "Left" || e.key === "ArrowLeft" || e.code === "KeyA") {
     leftPressed = true;
   } else if (e.key === "Up" || e.key === "ArrowUp") {
     upPressed = true;
   } else if (e.key === "Down" || e.key === "ArrowDown") {
     downPressed = true;
+  } else if (e.code === "Space") {
+    // Spaceキーで発射
+    if (!ballMoving) {
+      dx = speed; // ボールの水平速度
+      dy = -speed; // ボールの垂直速度
+      ballMoving = true;
+    }
   }
 }
-
 function keyUpHandler(e) {
-  if (e.key === "Right" || e.key === "ArrowRight") {
+  if (e.key === "Right" || e.key === "ArrowRight" || e.code === "KeyD") {
     rightPressed = false;
-  } else if (e.key === "Left" || e.key === "ArrowLeft") {
+  } else if (e.key === "Left" || e.key === "ArrowLeft" || e.code === "KeyA") {
     leftPressed = false;
   } else if (e.key === "Up" || e.key === "ArrowUp") {
     upPressed = false;
@@ -126,9 +144,13 @@ function checkBrickCollision() {
 }
 function pre() {
   points = 0;
+  x = paddleX + paddleWidth / 2; // ボールをパドル中央に配置
+  y = paddleY - ballRadius; // ボールをパドルの上に配置
+  dx = 0; // 初期速度は0
+  dy = 0; // 初期速度は0
   pointShow.innerHTML = points;
-  x = canvas.width / 2;
-  y = canvas.height - 30;
+  levelShow.innerHTML = level;
+  ballMoving = false; // ボールは静止状態
   paddleX = (canvas.width - paddleWidth) / 2;
   paddleY = canvas.height - paddleHeight;
   rightPressed = false;
@@ -136,6 +158,7 @@ function pre() {
   upPressed = false;
   downPressed = false;
   gameRunning = true;
+  isGameStarted = true;
   for (let r = 0; r < brickRowCount; r++) {
     bricks[r] = [];
     for (let c = 0; c < brickColumnCount; c++) {
@@ -168,8 +191,36 @@ function checkClear() {
 
   if (clear) {
     bricks = [];
-    alert("you win");
     gameRunning = false;
+    level++; // レベルを1増加
+    speed *= 1.2;
+    brickRowCount += 1;
+    isGameStarted = false;
+    const messageDiv = document.createElement("div");
+    messageDiv.style.position = "absolute";
+    messageDiv.style.top = "50%";
+    messageDiv.style.left = "50%";
+    messageDiv.style.transform = "translate(-50%, -50%)";
+    messageDiv.style.padding = "20px";
+    messageDiv.style.backgroundColor = "rgba(0, 0, 0, 0.8)";
+    messageDiv.style.color = "white";
+    messageDiv.style.textAlign = "center";
+    messageDiv.style.borderRadius = "10px";
+    messageDiv.innerHTML = `<h2>Congratulations!</h2><button id='nextLevelButton'>Next Level</button>`;
+
+    document.body.appendChild(messageDiv);
+
+    const nextLevelButton = document.getElementById("nextLevelButton");
+    nextLevelButton.style.marginTop = "10px";
+    nextLevelButton.style.padding = "10px 20px";
+    nextLevelButton.style.fontSize = "16px";
+    nextLevelButton.style.cursor = "pointer";
+
+    nextLevelButton.addEventListener("click", () => {
+      document.body.removeChild(messageDiv);
+      pre(); // 次のレベルを初期化
+    });
+
     return;
   }
 }
@@ -189,27 +240,60 @@ function draw() {
   } else if (downPressed && paddleY < canvas.height - paddleHeight) {
     paddleY += 7;
   }
+  if (!ballMoving) {
+    // ボールが動いていないときはパドルに追随
+    x = paddleX + paddleWidth / 2;
+    y = paddleY - ballRadius;
+  }
+
   checkBrickCollision();
   checkClear();
   x += dx;
   y += dy;
+  // if (
+  //   y < 0 ||
+  //   (y + ballRadius >= paddleY && x >= paddleX && x <= paddleX + paddleWidth) ||
+  //   (x + ballRadius >= paddleX &&
+  //     x - ballRadius <= paddleX + paddleWidth &&
+  //     y + ballRadius > paddleY &&
+  //     y < paddleY + paddleHeight)
+  // ) {
+  //   dy = -dy;
+  // }
   if (x < 0 || x > canvas.width) dx = -dx;
-  if (
-    y < 0 ||
-    (y + ballRadius >= paddleY && x >= paddleX && x <= paddleX + paddleWidth) ||
-    (x + ballRadius >= paddleX &&
-      x - ballRadius <= paddleX + paddleWidth &&
-      y + ballRadius > paddleY &&
-      y < paddleY + paddleHeight)
-  )
-    dy = -dy;
+  if (y < 0) dy = -dy;
 
+  checkCollision();
+
+  // ボールがキャンバスの上端に衝突
   if (y > canvas.height) {
     alert("you lose");
+    gameRunning = false;
+    level = 1; // レベルを1増加
+    speed = 4;
+    brickRowCount = 7;
+    isGameStarted = false;
     return;
   }
+
   requestAnimationFrame(draw);
 }
+function checkCollision() {
+  const currentTime = Date.now(); // 現在時刻を取得
+  if (currentTime - lastCollisionTime < 300) {
+    return;
+  }
 
+  if (
+    y + ballRadius >= paddleY && // ボールの下端がパドルの上端を超えた場合
+    y + ballRadius <= paddleY + paddleHeight && // ボールがパドルの垂直範囲内にある
+    x + ballRadius > paddleX && // ボールの右端がパドルの左端を超える
+    x - ballRadius < paddleX + paddleWidth
+  ) {
+    // ボールの左端がパドルの右端を超えない
+    dy = -dy;
+    lastCollisionTime = currentTime; // 衝突時刻を記録
+  }
+}
 const btn = document.querySelector("#startButton");
 btn.addEventListener("click", pre);

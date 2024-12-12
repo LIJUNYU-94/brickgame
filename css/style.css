@@ -8,10 +8,29 @@ body {
 }
 
 canvas {
+  margin: 0 auto;
   border: 1px solid #000;
-  scale: 2;
+  transform: scale(2);
   background: url(../img/haoren.png) no-repeat 50% 5%;
   background-size: 50%;
+  transform-origin: top center;
+}
+@media screen and (max-width: 1538px) {
+  canvas {
+    transform: scale(1.6);
+  }
+}
+
+@media screen and (max-width: 1367px) {
+  canvas {
+    transform: scale(1.3);
+  }
+}
+@media screen and (max-width: 900px) {
+  canvas {
+    transform: scale(1);
+    margin-top: 20px;
+  }
 }
 
 button {
@@ -22,12 +41,18 @@ button {
 
 p {
   position: absolute;
-  top: 10vh;
+  font-size: 24px;
+  text-align: right;
   left: 10vh;
-  font-size: 48px;
 }
 
+.tpoint {
+  top: 10vh;
+}
+.tlevel {
+  top: 50vh;
+}
 span {
   display: block;
-  font-size: 64px;
+  font-size: 32px;
 }
