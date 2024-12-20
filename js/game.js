@@ -3,16 +3,21 @@ const ctx = canvas.getContext("2d");
 const colors = ["#FF9500", "#2104f2", "#FF0033", "#047431", "#459211"];
 const pointShow = document.querySelector(".point");
 const levelShow = document.querySelector(".level");
+const lvl = document.querySelector(".lvl");
+const btn = document.querySelector("#startButton");
 let gameRunning = true;
 let isGameStarted = false;
 let ballMoving = false;
 let level = 1; // 初期レベル
+let speed = 10 / 3;
+
 let points = 0;
+let nowPoint = 0;
 let lastCollisionTime = 0; // 前回の衝突時刻を記録
 
 document.addEventListener("keydown", keyDownHandler, false);
 document.addEventListener("keyup", keyUpHandler, false);
-let brickRowCount = 7;
+let brickRowCount = 6;
 let brickColumnCount = 12;
 let brickWidth = 35;
 let brickHeight = 20;
@@ -20,13 +25,11 @@ let brickPadding = 3;
 let brickOffsetTop = 10;
 let brickOffsetLeft = 13;
 let bricks = [];
-
 let ballRadius = 10;
 let x = canvas.width / 2;
 let y = canvas.height - 30;
 let dx = 4;
 let dy = -4;
-let speed = 4;
 let paddleHeight = 10;
 let paddleWidth = 75;
 let paddleX = (canvas.width - paddleWidth) / 2;
@@ -35,6 +38,17 @@ let rightPressed = false;
 let leftPressed = false;
 let upPressed = false;
 let downPressed = false;
+lvl.addEventListener("change", function (event) {
+  level = parseInt(event.target.value, 10); // 選択された値を数値として取得
+  brickRowCount = 5 + level;
+  if (level === 1) {
+    speed = 10 / 3;
+  } else if (level === 2) {
+    speed = 4;
+  } else if (level === 3) {
+    speed = 4.8;
+  }
+});
 document.addEventListener("keydown", (e) => {
   if (e.code === "Space") {
     e.preventDefault(); // デフォルト動作（スクロールなど）を完全に無効化
@@ -142,8 +156,9 @@ function checkBrickCollision() {
     }
   }
 }
+
 function pre() {
-  points = 0;
+  btn.removeEventListener("click", pre);
   x = paddleX + paddleWidth / 2; // ボールをパドル中央に配置
   y = paddleY - ballRadius; // ボールをパドルの上に配置
   dx = 0; // 初期速度は0
@@ -159,6 +174,7 @@ function pre() {
   downPressed = false;
   gameRunning = true;
   isGameStarted = true;
+  lvl.style.display = "none";
   for (let r = 0; r < brickRowCount; r++) {
     bricks[r] = [];
     for (let c = 0; c < brickColumnCount; c++) {
@@ -168,10 +184,11 @@ function pre() {
         y: 0,
         status: 1,
         color: colors[random],
-        point: random,
+        point: random * level,
       };
     }
   }
+
   draw();
 }
 function checkClear() {
@@ -194,7 +211,7 @@ function checkClear() {
     gameRunning = false;
     level++; // レベルを1増加
     speed *= 1.2;
-    brickRowCount += 1;
+    brickRowCount = 5 + level;
     isGameStarted = false;
     const messageDiv = document.createElement("div");
     messageDiv.style.position = "absolute";
@@ -207,15 +224,12 @@ function checkClear() {
     messageDiv.style.textAlign = "center";
     messageDiv.style.borderRadius = "10px";
     messageDiv.innerHTML = `<h2>Congratulations!</h2><button id='nextLevelButton'>Next Level</button>`;
-
     document.body.appendChild(messageDiv);
-
     const nextLevelButton = document.getElementById("nextLevelButton");
     nextLevelButton.style.marginTop = "10px";
     nextLevelButton.style.padding = "10px 20px";
     nextLevelButton.style.fontSize = "16px";
     nextLevelButton.style.cursor = "pointer";
-
     nextLevelButton.addEventListener("click", () => {
       document.body.removeChild(messageDiv);
       pre(); // 次のレベルを初期化
@@ -265,14 +279,18 @@ function draw() {
 
   checkCollision();
 
-  // ボールがキャンバスの上端に衝突
+  //失敗判定
   if (y > canvas.height) {
     alert("you lose");
+    btn.addEventListener("click", pre);
+    btn.innerHTML = "ゲーム開始";
     gameRunning = false;
-    level = 1; // レベルを1増加
-    speed = 4;
-    brickRowCount = 7;
+    level = 1; // レベル１に戻る
+    speed = 10 / 3;
+    brickRowCount = 6;
     isGameStarted = false;
+    points = 0;
+    lvl.style.display = "block";
     return;
   }
 
@@ -295,5 +313,5 @@ function checkCollision() {
     lastCollisionTime = currentTime; // 衝突時刻を記録
   }
 }
-const btn = document.querySelector("#startButton");
+
 btn.addEventListener("click", pre);

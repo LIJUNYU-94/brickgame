@@ -2,18 +2,17 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: top;
   height: 100vh;
   margin: 0;
 }
 
 canvas {
-  margin: 0 auto;
   border: 1px solid #000;
   transform: scale(2);
+  transform-origin: top center;
   background: url(../img/haoren.png) no-repeat 50% 5%;
   background-size: 50%;
-  transform-origin: top center;
 }
 @media screen and (max-width: 1538px) {
   canvas {
@@ -33,8 +32,11 @@ canvas {
   }
 }
 
-button {
-  margin-top: 200px;
+#startButton {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 85vh;
   padding: 10px 20px;
   font-size: 16px;
 }
@@ -43,16 +45,26 @@ p {
   position: absolute;
   font-size: 24px;
   text-align: right;
-  left: 10vh;
+  left: 5vw;
 }
 
 .tpoint {
   top: 10vh;
 }
 .tlevel {
-  top: 50vh;
+  top: 20vh;
 }
 span {
   display: block;
   font-size: 32px;
+}
+.lvl {
+  font-size: 24px;
+  position: absolute;
+  left: 5vw;
+  top: 33vh;
+}
+
+#level {
+  font-size: 20px;
 }

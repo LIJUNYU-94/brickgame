@@ -9,10 +9,17 @@
     <script src="js/game.js" defer></script>
   </head>
   <body>
-    <p class="tpoint">今の得点は：<span class="point"></span></p>
-    <p class="tlevel">今のレベルは：<span class="level"></span></p>
+    <p class="tpoint">Point now：<span class="point"></span></p>
+    <p class="tlevel">Stage now：<span class="level"></span></p>
     <canvas id="gameCanvas" width="480" height="320"></canvas>
     <button id="startButton">ゲーム開始</button>
-    <button id="restartButton" style="display: none">もう一度遊ぶ</button>
+    <div class="lvl">
+      <label for="level">レベル選択：</label>
+      <select name="level" id="level">
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+      </select>
+    </div>
   </body>
 </html>
